@@ -1,0 +1,161 @@
+/* Load after styles.css. Theme colors never replace financial positive/negative meanings. */
+:root {
+  --font-scale: 1;
+  --accent-soft: #eef4e7;
+  --accent-ink: #305831;
+  --accent: #678b54;
+  --pale: #f8faf4;
+  --plot-secondary: #8fa981;
+  --positive: #247044;
+  --negative: #b43e3e;
+  --negative-on-dark: #ffb6ac;
+  --warning-ink: #76501d;
+  --warning-bg: #fff9ec;
+  --warning-line: #e9d4a7;
+  --error-bg: #fff2ef;
+  --on-dark: #ffffff;
+  color-scheme: light;
+}
+
+body { background: var(--bg); color: var(--ink); }
+.sidebar, .topbar, .card, dialog, .wealth-strip { background: var(--card); border-color: var(--line); color: var(--ink); }
+.brand, .breadcrumb strong, .field > span, .field-label, .person-mini-head strong,
+.wealth-strip strong, .plan-card h3, .policy-content h3 { color: var(--ink); }
+.brand-note, .nav-label, .nav button, .privacy-note p, .version, .breadcrumb, .saved-state,
+.eyebrow, .subtitle, .section-heading p, .kpi-title, .kpi-foot, .chart-meta,
+.chart-footer, .donut-inner, .expense-legend-row, .expense-legend-row small,
+.goal-info, .goal-info span, .mini-person-note, .mini-row, .person-mini-metrics span,
+.scenario-name small, .scenario-card-top small, .scenario-card-bottom,
+.footnote, .footnote > span:last-child, .form-description, .field small, .input-wrap .unit,
+.inline-note, .summary-caption, .summary-item, .summary-sticky .summary-note,
+.table-note, .expense-header, .expense-total, .budget-stat span, .plan-card small,
+.plan-card .plan-meta, .policy-content, .toolbar-label, .basis-strip,
+.basis-value > span, .basis-value p, .basis-preview span, .reference-actions span,
+.rate-summary, .wealth-note, .wealth-strip small, .choice-card small,
+.bonus-ledger, .bonus-ledger small, .empty-state, dialog p { color: var(--muted); }
+.privacy-note, .person-mini, .basis-chip, .input-wrap input:disabled { background: var(--pale); border-color: var(--line); }
+.privacy-title, .chip, .checkbox-field, .basis-chip strong, .basis-value strong,
+.basis-preview strong, .rate-summary strong, .summary-item strong, .summary-large,
+.chart-footer strong, .donut-inner strong, .expense-legend-row strong,
+.goal-info strong, .goal-percent, .mini-row strong, .scenario-value,
+.budget-stat strong, .expense-total strong, .plan-card .plan-value,
+.comparison-box, .comparison-box > p, .comparison-box strong,
+.choice-card, .choice-card > span, .bonus-ledger strong { color: var(--accent-ink); }
+.privacy-title .icon, .kpi-title .icon, .select-wrap:after, .mobile-menu, .mobile-close { color: var(--green); }
+.brand-mark { background: var(--dark); color: var(--mint); }
+.nav button.active { background: var(--accent-soft); color: var(--accent-ink); }
+.nav button.active:after, .status-dot { background: var(--green); }
+.btn { background: var(--card); border-color: var(--line); color: var(--accent-ink); }
+.btn-primary, .toast { background: var(--dark); border-color: var(--dark); color: var(--on-dark); }
+.btn-primary:hover { color: var(--on-dark); }
+.btn-soft, .chip, .demo-banner, .fund-kpi, .fund-title, .basis-value, .basis-preview,
+.bonus-basis-note, .wealth-icon, .comparison-box, .scenario-row.selected,
+.choice-card.selected, .scenario-card.selected, .avatar { background: var(--accent-soft); border-color: var(--line); color: var(--accent-ink); }
+.avatar.b { background: var(--pale); border: 1px solid var(--line); color: var(--muted); }
+.btn-text { background: transparent; border-color: transparent; color: var(--green); }
+.segmented { background: var(--accent-soft); border-color: var(--line); }
+.segmented button { color: var(--muted); }
+.segmented button.active { background: var(--card); color: var(--accent-ink); }
+.global-mode button.active { background: var(--mint); color: var(--accent-ink); }
+.choice-card, .scenario-card { border-color: var(--line); }
+.choice-card.selected, .scenario-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.input-wrap, .field select, .select-wrap select, .expense-row input, .expense-row select {
+  background: var(--card); border-color: var(--line); color: var(--ink);
+}
+.input-wrap input { color: var(--ink); }
+.input-wrap:focus-within { border-color: var(--green); box-shadow: 0 0 0 2px var(--accent-soft); }
+button:focus-visible, a:focus-visible { outline-color: var(--green); }
+input:focus, select:focus { outline-color: var(--green); border-color: var(--green); }
+.checkbox-field input { accent-color: var(--green); }
+.tabs-line, .advanced-settings, .rate-summary, .mini-row, .expense-total,
+.chart-footer, .table-note, .expense-row, .summary-sticky .summary-note,
+.bonus-ledger, .scenario-card-bottom, .top-actions { border-color: var(--line); }
+.tabs-line button { color: var(--muted); }
+.tabs-line button.active { color: var(--green); border-color: var(--green); }
+.goal-track { background: var(--accent-soft); }
+.goal-progress { background: var(--green); }
+.legend-dot { background: var(--green); }
+.legend-dot.light { background: var(--plot-secondary); }
+.legend-dot.dash { background: repeating-linear-gradient(90deg,var(--plot-secondary) 0 5px,transparent 5px 8px); }
+.form-section .section-divider, .mini-divider { background: var(--line); }
+.kpi.featured { background: var(--dark); border-color: var(--dark); color: var(--on-dark); }
+.featured .kpi-title, .featured .kpi-title .icon, .featured .kpi-foot { color: var(--on-dark); }
+.featured .kpi-value { color: var(--mint); }
+.featured .badge { color: var(--on-dark); background: #ffffff16; }
+.fund-kpi .kpi-value { color: var(--accent-ink); }
+th { background: var(--pale); border-color: var(--line); color: var(--muted); }
+td { color: var(--ink); border-color: var(--line); }
+tfoot td { background: var(--accent-soft); border-color: var(--line); color: var(--accent-ink); }
+tbody tr:hover { background: var(--pale); }
+.warning { background: var(--warning-bg); border-color: var(--warning-line); color: var(--warning-ink); }
+.warnings-disclosure summary { color: var(--warning-ink); }
+.error-state { background: var(--error-bg); border-color: #e7b7b0; color: var(--negative); }
+.positive { color: var(--positive) !important; }
+.negative, .remove-expense:hover { color: var(--negative) !important; }
+.negative-on-dark, .featured .kpi-value.negative-on-dark { color: var(--negative-on-dark) !important; }
+
+/* SVGs use presentation attributes in the buildless app; CSS supersedes their fixed green paint. */
+.line-chart text { fill: var(--muted); }
+.line-chart stop { stop-color: var(--accent); }
+.line-chart path[stroke="#306c50"], .line-chart circle[stroke="#306c50"] { stroke: var(--green); }
+.line-chart path[stroke="#8fa981"] { stroke: var(--plot-secondary); }
+.line-chart path[stroke="#e4eae5"] { stroke: var(--line); }
+.line-chart circle[fill="#fff"] { fill: var(--card); }
+.expense-legend-row:nth-child(1) .legend-dot, .donut svg circle:nth-child(2) { background: var(--green) !important; stroke: var(--green); }
+.expense-legend-row:nth-child(2) .legend-dot, .donut svg circle:nth-child(3) { background: var(--accent) !important; stroke: var(--accent); }
+.expense-legend-row:nth-child(3) .legend-dot, .donut svg circle:nth-child(4) { background: var(--plot-secondary) !important; stroke: var(--plot-secondary); }
+.expense-legend-row:nth-child(4) .legend-dot, .donut svg circle:nth-child(5) { background: var(--mint) !important; stroke: var(--mint); }
+.expense-legend-row:nth-child(5) .legend-dot, .donut svg circle:nth-child(6) { background: var(--line) !important; stroke: var(--line); }
+.donut svg circle:first-child { stroke: var(--accent-soft); }
+
+@media (hover:hover) and (pointer:fine) {
+  .btn:hover, .nav button:hover:not(.active), .btn-soft:hover { background: var(--accent-soft); color: var(--accent-ink); }
+  .btn-primary:hover { background: var(--green); border-color: var(--green); color: var(--on-dark); }
+  .btn-text:hover { background: transparent; color: var(--accent-ink); }
+}
+
+/* Compact mode reduces whitespace, never font sizes or minimum touch target dimensions. */
+html[data-density="compact"] .main { padding-top: 22px; }
+html[data-density="compact"] .page-head { margin-bottom: 18px; }
+html[data-density="compact"] .card-pad, html[data-density="compact"] .form-section { padding: 19px 21px; }
+html[data-density="compact"] .form-stack { gap: 15px; }
+html[data-density="compact"] .form-grid { gap: 16px 20px; }
+html[data-density="compact"] .section-heading { margin-bottom: 14px; }
+html[data-density="compact"] .kpi { padding: 18px 20px; min-height: 154px; }
+html[data-density="compact"] .kpi-value { margin-top: 14px; }
+html[data-density="compact"] .kpi-foot { margin-top: 10px; }
+html[data-density="compact"] .person-mini, html[data-density="compact"] .scenario-card { padding: 17px 20px; }
+html[data-density="compact"] .person-mini-head { margin-bottom: 14px; }
+html[data-density="compact"] th, html[data-density="compact"] td { padding-top: 12px; padding-bottom: 12px; }
+html[data-density="compact"] .dashboard-grid, html[data-density="compact"] .kpis { gap: 14px; }
+
+.settings-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; }
+.settings-section { min-width: 0; }
+.settings-section h2 { margin-bottom: 8px; }
+.settings-section > p { color: var(--muted); line-height: 1.8; margin-bottom: 20px; }
+.settings-full { grid-column: 1 / -1; }
+.theme-picker { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; margin-top: 18px; }
+.theme-option { background: var(--card); border: 1px solid var(--line); border-radius: 9px; padding: 14px 10px; color: var(--ink); display: flex; flex-direction: column; gap: 9px; align-items: center; min-height: 86px; }
+.theme-option[aria-pressed="true"], .theme-option.active { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); background: var(--accent-soft); }
+.theme-swatch { display: block; width: 38px; height: 24px; border-radius: 6px; background: var(--swatch-color,var(--green)); border: 1px solid #00000016; }
+.theme-swatch[data-theme="sage"] { --swatch-color: #35663f; }
+.theme-swatch[data-theme="ocean"] { --swatch-color: #24667a; }
+.theme-swatch[data-theme="sand"] { --swatch-color: #86612f; }
+.theme-swatch[data-theme="plum"] { --swatch-color: #765484; }
+.theme-swatch[data-theme="graphite"] { --swatch-color: #4a5e70; }
+.settings-checks { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 20px; }
+.settings-checks .checkbox-field { min-height: 44px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 7px; background: var(--pale); }
+.settings-checks small, .settings-note { color: var(--muted); line-height: 1.8; }
+.font-scale-control { display: grid; grid-template-columns: minmax(120px,1fr) auto; align-items: center; gap: 18px; }
+.font-scale-control input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--green); }
+.font-scale-control output { min-width: 4em; font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+.dashboard-empty { padding: 30px; border: 1px dashed var(--line); border-radius: 11px; background: var(--card); color: var(--muted); line-height: 1.9; }
+
+@media (max-width:760px) {
+  .settings-grid { grid-template-columns: 1fr; gap: 18px; }
+  .theme-picker { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .settings-checks { grid-template-columns: 1fr; }
+  html[data-density="compact"] .main { padding: 20px 16px; }
+  html[data-density="compact"] .card-pad, html[data-density="compact"] .form-section { padding: 18px 16px; }
+  html[data-density="compact"] .kpi { padding: 17px 14px; min-height: 165px; }
+}

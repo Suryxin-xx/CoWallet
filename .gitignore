@@ -26,6 +26,10 @@ test-results/
 playwright-report/
 trace.zip
 *.har
+!docs/screenshots/overview.png
+!docs/screenshots/bonus.png
+!docs/screenshots/housing.png
+!docs/screenshots/plans.png
 
 # Generated local packages and machine-specific files.
 releases/

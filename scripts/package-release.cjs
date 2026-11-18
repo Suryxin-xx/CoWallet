@@ -7,9 +7,14 @@ const zlib = require('node:zlib');
 
 const VERSION = '1.1';
 const ROOT = path.resolve(__dirname, '..');
+const PUBLIC_SCREENSHOTS = Object.freeze([
+  'docs/screenshots/overview.png', 'docs/screenshots/bonus.png',
+  'docs/screenshots/housing.png', 'docs/screenshots/plans.png'
+]);
 const FILES = Object.freeze([
   'index.html', 'styles.css', 'appearance.css', 'engine.js', 'mortgage.js', 'preferences.js',
-  'app.js', '打开CoWallet.cmd', 'README.md', '.gitignore',
+  'app.js', '打开CoWallet.cmd', 'README.md', 'LICENSE', 'docs/REFERENCE.md', '.gitignore',
+  ...PUBLIC_SCREENSHOTS,
   'tests/engine.test.cjs', 'tests/mortgage.test.cjs', 'tests/preferences.test.cjs',
   'tests/planning-integration.test.cjs',
   'tests/plans.test.cjs', 'tests/package-release.test.cjs',
@@ -48,7 +53,7 @@ function releaseIndex(data) {
 
 function readAllowedFiles() {
   const realRoot = fs.realpathSync(ROOT);
-  return FILES.map(name => {
+  const files = FILES.map(name => {
     const source = path.resolve(ROOT, name);
     const info = fs.lstatSync(source);
     if (!insideRoot(source, ROOT) || info.isSymbolicLink() || !info.isFile() ||
@@ -58,6 +63,30 @@ function readAllowedFiles() {
     const data = fs.readFileSync(source);
     return { name, data: name === 'index.html' ? releaseIndex(data) : data };
   });
+  validateReadmeImages(files);
+  return files;
+}
+
+function validateReadmeImages(files) {
+  const readme = files.find(file => file.name === 'README.md').data.toString('utf8');
+  const references = [];
+  for (const match of readme.matchAll(/!\[[^\]]*\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+["'][^"']*["'])?\s*\)/g)) {
+    references.push(match[1] || match[2]);
+  }
+  for (const match of readme.matchAll(/<img\b[^>]*\ssrc\s*=\s*(["'])(.*?)\1[^>]*>/gi)) {
+    references.push(match[2]);
+  }
+  for (const reference of references) {
+    if (/^(?:https?:|data:|\/\/)/i.test(reference)) continue; // No fetches; remote badges are not local assets.
+    if (/^[a-z][a-z0-9+.-]*:/i.test(reference)) throw new Error('README本地图片不能引用本机路径或非网页协议。');
+    let relative;
+    try { relative = decodeURIComponent(reference.split(/[?#]/)[0]).replace(/\\/g, '/'); }
+    catch { throw new Error('README本地图片地址编码无效。'); }
+    relative = path.posix.normalize(relative);
+    if (!PUBLIC_SCREENSHOTS.includes(relative)) {
+      throw new Error('README本地图片必须使用四张明确列入白名单的虚构示例图。');
+    }
+  }
 }
 
 function crc32(buffer) {
@@ -128,7 +157,7 @@ function parseOptions(args) {
       }
       options.suffix = suffix;
       hasSuffix = true;
-    } else throw new Error('用法：node scripts/package-release.cjs [--directory] [--list] [--suffix savings]');
+    } else throw new Error('用法：node scripts/package-release.cjs [--directory] [--list] [--suffix windows]');
   }
   options.prefix = `CoWallet-${VERSION}${options.suffix ? '-' + options.suffix : ''}`;
   return options;
@@ -161,7 +190,7 @@ function main() {
     fs.writeFileSync(path.join(releases, `${options.prefix}.zip`), zip(files, options.prefix), { flag: 'wx' });
     console.log(`已生成 releases/${options.prefix}.zip（${files.length} 个白名单文件）。`);
   }
-  console.log('仅生成本地发布副本；未读取备份/截图/浏览器数据，未连接或发布到 GitHub。');
+  console.log('仅生成本地发布副本；仅包含指定虚构示例图，未读取私人备份/截图/浏览器数据，未连接或发布到 GitHub。');
 }
 
 try { main(); }

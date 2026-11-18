@@ -9,23 +9,29 @@ const zlib = require('node:zlib');
 const root = path.resolve(__dirname, '..');
 const scriptFile = path.join(root, 'scripts', 'package-release.cjs');
 const script = fs.readFileSync(scriptFile, 'utf8');
+const publicScreenshots = ['docs/screenshots/overview.png', 'docs/screenshots/bonus.png',
+  'docs/screenshots/housing.png', 'docs/screenshots/plans.png'];
 const allowed = ['index.html', 'styles.css', 'appearance.css', 'engine.js', 'mortgage.js', 'preferences.js',
-  'app.js', '打开CoWallet.cmd', 'README.md', '.gitignore',
+  'app.js', '打开CoWallet.cmd', 'README.md', 'LICENSE', 'docs/REFERENCE.md', '.gitignore',
+  ...publicScreenshots,
   'tests/engine.test.cjs', 'tests/mortgage.test.cjs', 'tests/preferences.test.cjs',
   'tests/planning-integration.test.cjs',
   'tests/plans.test.cjs', 'tests/package-release.test.cjs',
   'scripts/package-release.cjs'];
 const sourceIndex = '<!doctype html>\n<html><head><meta charset="UTF-8">\n<meta name="cowallet-channel" content="local">\n<title>虚构例子</title></head><body>本机页面</body></html>\n';
 const releasedIndex = sourceIndex.replace('content="local"', 'content="release"');
+const sourceReadme = '# CoWallet\n\n![总览](docs/screenshots/overview.png)\n![奖金](./docs/screenshots/bonus.png "虚构示例")\n<img src="docs/screenshots/housing.png" alt="住房">\n![方案](docs/screenshots/plans.png)\n[![Release](https://img.shields.io/example.svg)](https://example.com)\n';
 function expectedBytes(name, release = false) {
   if (name === 'index.html') return Buffer.from(release ? releasedIndex : sourceIndex);
+  if (name === 'README.md') return Buffer.from(sourceReadme);
+  if (publicScreenshots.includes(name)) return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0]), Buffer.from(name)]);
   if (name === 'styles.css') return Buffer.from([0, 0xff, 0x80, 0x41, 0xc0, 0xed]);
   return Buffer.from(`public source: ${name}`);
 }
 
-function runPackager(index = sourceIndex, args = []) {
+function runPackager(index = sourceIndex, args = [], readme = sourceReadme) {
 const paths = new Map(allowed.map(name => [path.resolve(root, name),
-  name === 'index.html' ? Buffer.from(index) : expectedBytes(name)]));
+  name === 'index.html' ? Buffer.from(index) : name === 'README.md' ? Buffer.from(readme) : expectedBytes(name)]));
 const reads = [], writes = [], logs = [];
 const mkdirs = [];
 const memoryFs = {
@@ -83,11 +89,13 @@ while (archive.readUInt32LE(offset) === 0x04034b50) {
   const relative = name.replace(/^CoWallet-1\.1\//, '');
   assert.ok(allowed.includes(relative), 'ZIP条目必须来自白名单');
   assert.ok(body.equals(expectedBytes(relative, true)), '除index渠道标记外，发布内容逐字节保留');
-  assert.ok(!/\.(?:png|jpg|json|csv|log|env)$|(?:^|\/)\.git(?:\/|$)/i.test(name));
+  if (/\.(?:png|jpg|jpeg|gif|webp|svg)$/i.test(relative)) assert.ok(publicScreenshots.includes(relative), '只允许四张明确核对的虚构示例图');
+  assert.ok(!/\.(?:json|csv|log|env)$|(?:^|\/)\.git(?:\/|$)/i.test(name));
   entries.push(relative);
   offset = bodyStart + size;
 }
 assert.deepEqual(entries, allowed);
+assert.deepEqual(entries.filter(name => name.endsWith('.png')), publicScreenshots);
 assert.equal(archive.readUInt32LE(offset), 0x02014b50);
 assert.equal(archive.readUInt32LE(archive.length - 22), 0x06054b50);
 assert.equal(archive.readUInt16LE(archive.length - 12), allowed.length);
@@ -115,30 +123,50 @@ for (const invalid of [
   assert.equal(rejected.writes.length, 0, '校验失败不得写出发布文件');
   assert.equal(rejected.mkdirs.length, 0, '校验失败不得创建发布目录');
 }
-const savings = runPackager(sourceIndex, ['--suffix', 'savings']);
-assert.equal(savings.processStub.exitCode, 0);
-assert.equal(savings.writes[0].file, path.join(root, 'releases', 'CoWallet-1.1-savings.zip'));
-let savingsOffset = 0, savingsEntries = 0;
-while (savings.writes[0].data.readUInt32LE(savingsOffset) === 0x04034b50) {
-  const data = savings.writes[0].data;
-  const size = data.readUInt32LE(savingsOffset + 18);
-  const nameLength = data.readUInt16LE(savingsOffset + 26);
-  const extraLength = data.readUInt16LE(savingsOffset + 28);
-  const name = data.subarray(savingsOffset + 30, savingsOffset + 30 + nameLength).toString('utf8');
-  assert.ok(name.startsWith('CoWallet-1.1-savings/'));
-  const relative = name.slice('CoWallet-1.1-savings/'.length);
-  const start = savingsOffset + 30 + nameLength + extraLength;
+for (const suffix of ['savings', 'windows']) {
+const release = runPackager(sourceIndex, ['--suffix', suffix]);
+const prefix = `CoWallet-1.1-${suffix}`;
+assert.equal(release.processStub.exitCode, 0);
+assert.equal(release.writes[0].file, path.join(root, 'releases', prefix + '.zip'));
+let releaseOffset = 0, releaseEntries = 0;
+while (release.writes[0].data.readUInt32LE(releaseOffset) === 0x04034b50) {
+  const data = release.writes[0].data;
+  const size = data.readUInt32LE(releaseOffset + 18);
+  const nameLength = data.readUInt16LE(releaseOffset + 26);
+  const extraLength = data.readUInt16LE(releaseOffset + 28);
+  const name = data.subarray(releaseOffset + 30, releaseOffset + 30 + nameLength).toString('utf8');
+  assert.ok(name.startsWith(prefix + '/'));
+  const relative = name.slice((prefix + '/').length);
+  const start = releaseOffset + 30 + nameLength + extraLength;
   assert.ok(zlib.inflateRawSync(data.subarray(start, start + size)).equals(expectedBytes(relative, true)));
-  savingsEntries += 1;
-  savingsOffset = start + size;
+  releaseEntries += 1;
+  releaseOffset = start + size;
 }
-assert.equal(savingsEntries, allowed.length);
-const savingsDirectory = runPackager(sourceIndex, ['--directory', '--suffix', 'savings']);
-assert.equal(savingsDirectory.processStub.exitCode, 0);
-for (const file of savingsDirectory.writes) {
-  const relative = path.relative(path.join(root, 'releases', 'CoWallet-1.1-savings'), file.file).split(path.sep).join('/');
+assert.equal(releaseEntries, allowed.length);
+const releaseDirectory = runPackager(sourceIndex, ['--directory', '--suffix', suffix]);
+assert.equal(releaseDirectory.processStub.exitCode, 0);
+for (const file of releaseDirectory.writes) {
+  const relative = path.relative(path.join(root, 'releases', prefix), file.file).split(path.sep).join('/');
   assert.ok(allowed.includes(relative));
   assert.ok(file.data.equals(expectedBytes(relative, true)));
+}
+}
+const listed = runPackager(sourceIndex, ['--suffix', 'windows', '--list']);
+assert.equal(listed.processStub.exitCode, 0);
+assert.equal(listed.reads.length, 0);
+assert.equal(listed.writes.length, 0);
+assert.equal(listed.logs[0], allowed.join('\n'));
+for (const invalidReadme of [
+  '![私人截图](preview.png)',
+  '![错误路径](../private/salary.png)',
+  '<img src="docs/screenshots/not-public.png">',
+  '![本机文件](file:///C:/private/salary.png)'
+]) {
+  const invalid = runPackager(sourceIndex, [], invalidReadme);
+  assert.equal(invalid.processStub.exitCode, 1, 'README本地图片必须在公开示例白名单中');
+  assert.equal(invalid.writes.length, 0);
+  assert.equal(invalid.mkdirs.length, 0);
+  assert.ok(invalid.logs.every(message => !message.includes('salary.png')), '错误日志不输出私人图片路径');
 }
 for (const suffix of ['../private', '..', 'a/b', '', 'Savings', 'valid--bad', 'x'.repeat(41)]) {
   const invalid = runPackager(sourceIndex, ['--suffix', suffix]);
@@ -146,4 +174,4 @@ for (const suffix of ['../private', '..', 'a/b', '', 'Savings', 'valid--bad', 'x
   assert.equal(invalid.reads.length, 0);
   assert.equal(invalid.writes.length, 0);
 }
-console.log(`发行包内存测试通过：${allowed.length}项白名单、ZIP/目录渠道与字节守恒、安全后缀、非法meta和路径拒绝。`);
+console.log(`发行包内存测试通过：${allowed.length}项白名单、四张指定示例图与README图片可达、Windows ZIP/目录渠道与字节守恒、非法路径拒绝。`);
